@@ -75,7 +75,7 @@ contract Staking is IStakingContract {
         uint256 allowedAmount = _token.allowance(account, address(this));
 
         require(
-            allowedAmount > amount,
+            allowedAmount < amount,
             "Provide appropriate allowance for staking"
         );
 
