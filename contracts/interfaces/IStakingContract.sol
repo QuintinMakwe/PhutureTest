@@ -3,7 +3,10 @@
 pragma solidity ^0.8.0;
 
 interface IStakingContract {
-    function stake(address account, uint256 amount) external returns (uint256);
+    function stake(address account, uint256 amount)
+        external
+        payable
+        returns (uint256);
 
     function unstake(address account, uint256 stakeId)
         external

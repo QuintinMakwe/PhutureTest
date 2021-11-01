@@ -13,10 +13,10 @@ contract Staking is IStakingContract {
 
     IERC20 _token;
 
-    address _distributionContractAddress;
+    address public _distributionContractAddress;
 
-    uint256 _totalStakedAmount = 0;
-    uint256 _totalAccruedReward = 0;
+    uint256 public _totalStakedAmount = 0;
+    uint256 public _totalAccruedReward = 0;
 
     struct Index {
         uint256 index;
@@ -29,35 +29,35 @@ contract Staking is IStakingContract {
         address account;
     }
 
-    Stake[] _stakes;
+    Stake[] public _stakes;
 
     /** @dev
      * Outer Key = user address
      * Inner Key  = stake struct id
      * Inner Map Value = stake struct amount
      */
-    mapping(address => mapping(uint256 => uint256)) _individualStakes;
+    mapping(address => mapping(uint256 => uint256)) public _individualStakes;
 
     /** @dev
      * Outer Key = user address
      * Inner Key  = stake stake struct id
      * Inner Map Value = reward snapshot value
      */
-    mapping(address => mapping(uint256 => uint256)) _rewardSnapshot;
+    mapping(address => mapping(uint256 => uint256)) public _rewardSnapshot;
 
     /** @dev
      * Outer Key = user address
      * Inner Key  = stake struct id
      * Inner Map Value = index struct of the stake
      */
-    mapping(address => mapping(uint256 => Index)) _stakeIndexes;
+    mapping(address => mapping(uint256 => Index)) public _stakeIndexes;
 
     /** @dev
      * Outer Key = user address
      * Inner Key  = stake struct id
      * Inner Map Value = index struct of the stake
      */
-    mapping(address => uint256) _aggregateStakeAmount;
+    mapping(address => uint256) public _aggregateStakeAmount;
 
     constructor(address stakingTokenAddress) {
         _distributionContractAddress = msg.sender;
@@ -66,6 +66,7 @@ contract Staking is IStakingContract {
 
     function stake(address account, uint256 amount)
         external
+        payable
         override
         returns (uint256)
     {
@@ -75,14 +76,14 @@ contract Staking is IStakingContract {
         uint256 allowedAmount = _token.allowance(account, address(this));
 
         require(
-            allowedAmount < amount,
+            allowedAmount >= amount,
             "Provide appropriate allowance for staking"
         );
 
         //transfer amount from staker to contract
         _token.safeTransferFrom(account, address(this), amount);
         //update the total amount
-        _totalStakedAmount.add(amount);
+        _totalStakedAmount = _totalStakedAmount.add(amount);
         //create stake struct
         Stake memory stakeObject = Stake(
             _stakes.length.add(1),
@@ -96,7 +97,9 @@ contract Staking is IStakingContract {
 
         _stakeIndexes[account][stakeObject.Id] = stakeIndex;
         //create aggregate stake
-        _aggregateStakeAmount[account].add(amount);
+        _aggregateStakeAmount[account] = _aggregateStakeAmount[account].add(
+            amount
+        );
         //create individual stakes
         _individualStakes[account][stakeObject.Id] = amount;
         //take snapshot
@@ -111,7 +114,9 @@ contract Staking is IStakingContract {
             "Can only distribute reward when there are staked token stake"
         );
 
-        _totalAccruedReward.add(amount.div(_totalStakedAmount));
+        _totalAccruedReward = _totalAccruedReward.add(
+            amount.div(_totalStakedAmount)
+        );
     }
 
     function viewUnstakableToken(address recipient)
@@ -140,9 +145,11 @@ contract Staking is IStakingContract {
         //send user reward
         _token.safeTransferFrom(address(this), account, accruedReward);
         //update total staked amount
-        _totalStakedAmount.sub(stakedAmount);
+        _totalStakedAmount = _totalStakedAmount.sub(stakedAmount);
         //update aggregate staked amount
-        _aggregateStakeAmount[account].sub(stakedAmount);
+        _aggregateStakeAmount[account] = _aggregateStakeAmount[account].sub(
+            stakedAmount
+        );
         //update  stake index
         _stakeIndexes[account][stakeId].exists = false;
         //return amountStaked + reward
