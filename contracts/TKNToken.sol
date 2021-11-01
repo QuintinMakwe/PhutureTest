@@ -1,10 +1,10 @@
 import "./interfaces/IERC20.sol";
-import "./interfaces/IERC20Metadata.sol";
-import "./utils/Context.sol";
+// import "./interfaces/IERC20Metadata.sol";
+// import "./utils/Context.sol";
 
 pragma solidity ^0.8.0;
 
-contract TKN is IERC20 {
+contract TKNToken is IERC20 {
     mapping(address => uint256) private _balances;
 
     mapping(address => mapping(address => uint256)) private _allowances;
@@ -26,6 +26,8 @@ contract TKN is IERC20 {
     constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
+        _totalSupply = totalSupply;
+        _balances[msg.sender] = totalSupply;
     }
 
     /**
