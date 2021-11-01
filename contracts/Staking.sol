@@ -1,22 +1,60 @@
 //SPDX-License-Identifier: Unlicense
+import "./interfaces/IStakingContract.sol";
+import "./interfaces/IERC20.sol";
+
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-contract Greeter {
-    string private greeting;
+contract Staking {
+    address _distributionContractAddress;
 
-    constructor(string memory _greeting) {
-        console.log("Deploying a Greeter with greeting:", _greeting);
-        greeting = _greeting;
+    uint256 _totalStakedAmount;
+    uint256 _totalAccruedReward;
+
+    struct Index {
+        uint256 index;
+        bool exists;
+        bool active;
     }
 
-    function greet() public view returns (string memory) {
-        return greeting;
+    struct Stake {
+        uint256 Id;
+        uint256 amount;
+        address account;
     }
 
-    function setGreeting(string memory _greeting) public {
-        console.log("Changing greeting from '%s' to '%s'", greeting, _greeting);
-        greeting = _greeting;
+    Stake[] _stakes;
+
+    /** @dev
+     * Outer Key = user address
+     * Inner Key  = stake struct id
+     * Inner Map Value = stake struct amount
+     */
+    mapping(address => mapping(uint256 => uint256)) _individualStakes;
+
+    /** @dev
+     * Outer Key = user address
+     * Inner Key  = stake struct id
+     * Inner Map Value = reward snapshot value
+     */
+    mapping(address => mapping(uint256 => uint256)) _rewardSnapshot;
+
+    /** @dev
+     * Outer Key = user address
+     * Inner Key  = stake struct id
+     * Inner Map Value = index struct of the stake
+     */
+    mapping(address => mapping(uint256 => Index)) _stakeIndexes;
+
+    /** @dev
+     * Outer Key = user address
+     * Inner Key  = stake struct id
+     * Inner Map Value = index struct of the stake
+     */
+    mapping(address => uint256) _aggregateStakeAmount;
+
+    constructor() {
+        _distributionContractAddress = msg.sender;
     }
 }
