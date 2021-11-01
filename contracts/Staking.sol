@@ -67,7 +67,7 @@ contract Staking is IStakingContract {
         address account,
         uint256 amount,
         address stakingTokenAddress
-    ) {
+    ) external override returns (uint256) {
         //check that staking token address is the right token address
         //check that amount is a non zero amount
         require(amount > 0, "Can only stake non zero amounts");
@@ -107,12 +107,21 @@ contract Staking is IStakingContract {
         return stakeObject.Id;
     }
 
-    function distributeReward(uint256 amount) {
+    function distributeReward(uint256 amount) external override {
         require(
             _totalStakedAmount > 0,
             "Can only distribute reward when there are staked token stake"
         );
 
         _totalAccruedReward += amount / _totalStakedAmount;
+    }
+
+    function viewUnstakableToken(address recipient)
+        external
+        view
+        override
+        returns (uint256)
+    {
+        return _aggregateStakeAmount(recipient);
     }
 }
