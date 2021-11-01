@@ -84,7 +84,7 @@ contract Staking is IStakingContract {
         //transfer amount from staker to contract
         _token.safeTransferFrom(account, address(this), amount);
         //update the total amount
-        _totalStakedAmount += amount;
+        _totalStakedAmount.add(amount);
         //create stake struct
         Stake memory stakeObject = Stake(
             _stakes.length.add(1),
@@ -98,7 +98,7 @@ contract Staking is IStakingContract {
 
         _stakeIndexes[account][stakeObject.Id] = stakeIndex;
         //create aggregate stake
-        _aggregateStakeAmount[account] += amount;
+        _aggregateStakeAmount[account].add(amount);
         //create individual stakes
         _individualStakes[account][stakeObject.Id] = amount;
         //take snapshot
@@ -113,7 +113,7 @@ contract Staking is IStakingContract {
             "Can only distribute reward when there are staked token stake"
         );
 
-        _totalAccruedReward += amount / _totalStakedAmount;
+        _totalAccruedReward.add(amount.div(_totalStakedAmount));
     }
 
     function viewUnstakableToken(address recipient)
@@ -142,9 +142,9 @@ contract Staking is IStakingContract {
         //send user reward
         _token.safeTransferFrom(address(this), account, accruedReward);
         //update total staked amount
-        _totalStakedAmount -= stakedAmount;
+        _totalStakedAmount.sub(stakedAmount);
         //update aggregate staked amount
-        _aggregateStakeAmount[account] -= stakedAmount;
+        _aggregateStakeAmount[account].sub(stakedAmount);
         //update  stake index
         _stakeIndexes[account][stakeId].exists = false;
         //return amountStaked + reward
