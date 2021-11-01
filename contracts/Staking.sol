@@ -2,15 +2,20 @@
 import "./interfaces/IStakingContract.sol";
 import "./interfaces/IERC20.sol";
 
+import "./libraries/SafeERC20.sol";
+import "./libraries/SafeMath.sol";
+
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-contract Staking {
+contract Staking is IStakingContract {
+    using SafeERC20 for IERC20;
+
     address _distributionContractAddress;
 
-    uint256 _totalStakedAmount;
-    uint256 _totalAccruedReward;
+    uint256 _totalStakedAmount = 0;
+    uint256 _totalAccruedReward = 0;
 
     struct Index {
         uint256 index;
@@ -35,7 +40,7 @@ contract Staking {
 
     /** @dev
      * Outer Key = user address
-     * Inner Key  = stake struct id
+     * Inner Key  = stake stake struct id
      * Inner Map Value = reward snapshot value
      */
     mapping(address => mapping(uint256 => uint256)) _rewardSnapshot;
@@ -56,5 +61,49 @@ contract Staking {
 
     constructor() {
         _distributionContractAddress = msg.sender;
+    }
+
+    function stake(
+        address account,
+        uint256 amount,
+        address stakingTokenAddress
+    ) {
+        //check that staking token address is the right token address
+        //check that amount is a non zero amount
+        require(amount > 0, "Can only stake non zero amounts");
+        //check allowance token contract to spend staker's tokens
+        IERC20 token = IERC20(stakingTokenAddress);
+
+        uint256 allowedAmount = token.allowance(account, address(this));
+
+        require(
+            allowedAmount > amount,
+            "Provide appropriate allowance for staking"
+        );
+
+        //transfer amount from staker to contract
+        token.safeTransferFrom(acount, address(this), amount);
+        //update the total amount
+        _totalStakedAmount += amount;
+        //create stake struct
+        Stake memory stakeObject = Stake(
+            _stakes.length.add(1),
+            amount,
+            account
+        );
+        //add to array
+        _stakes.push(stakeObject);
+        //create index
+        Index memory stakeIndex = Index(stakeObject.Id.sub(1), true, true);
+
+        _stakeIndexes[account][stakeObject.Id] = stakeIndex;
+        //create aggregate stake
+        _aggregateStakeAmount[account] += amount;
+        //create individual stakes
+        _individualStakes[account][stakeObject.Id] = amount;
+        //take snapshot
+        _rewardSnapshot[account][stakeObject.Id] = _totalAccruedReward;
+        //return index of stake
+        return stakeObject.Id;
     }
 }
