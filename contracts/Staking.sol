@@ -67,18 +67,15 @@ contract Staking is IStakingContract {
         _token = IERC20(stakingTokenAddress);
     }
 
-    function stake(
-        address account,
-        uint256 amount,
-        address stakingTokenAddress
-    ) external override returns (uint256) {
-        //check that staking token address is the right token address
+    function stake(address account, uint256 amount)
+        external
+        override
+        returns (uint256)
+    {
         //check that amount is a non zero amount
         require(amount > 0, "Can only stake non zero amounts");
         //check allowance token contract to spend staker's tokens
-        IERC20 token = IERC20(stakingTokenAddress);
-
-        uint256 allowedAmount = token.allowance(account, address(this));
+        uint256 allowedAmount = _token.allowance(account, address(this));
 
         require(
             allowedAmount > amount,
