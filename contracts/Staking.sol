@@ -12,7 +12,10 @@ import "hardhat/console.sol";
 contract Staking is IStakingContract {
     using SafeERC20 for IERC20;
 
+    IERC20 _token;
+
     address _distributionContractAddress;
+    address _stakingToken;
 
     uint256 _totalStakedAmount = 0;
     uint256 _totalAccruedReward = 0;
@@ -20,7 +23,6 @@ contract Staking is IStakingContract {
     struct Index {
         uint256 index;
         bool exists;
-        bool active;
     }
 
     struct Stake {
@@ -59,8 +61,10 @@ contract Staking is IStakingContract {
      */
     mapping(address => uint256) _aggregateStakeAmount;
 
-    constructor() {
+    constructor(address stakingTokenAddress) {
         _distributionContractAddress = msg.sender;
+        _stakingToken = stakingTokenAddress;
+        _token = IERC20(stakingTokenAddress);
     }
 
     function stake(
@@ -123,5 +127,30 @@ contract Staking is IStakingContract {
         returns (uint256)
     {
         return _aggregateStakeAmount(recipient);
+    }
+
+    function unstake(address account, uint256 stakeId)
+        external
+        returns (uint256)
+    {
+        //check that stake id exist
+        require(_stakeIndexes[account][stakeId].exists, "No record of stake");
+        //calculate reward
+        uint256 stakedAmount = _individualStakes[account][stakeId];
+        uint256 currentReward = _totalAccruedReward;
+        uint256 rewardAtDeposit = _rewardSnapshot[account][stakeId];
+        uint256 accruedReward = stakedAmount.mul(
+            currentReward.sub(rewardAtDeposit)
+        );
+        //send user reward
+        _token.safeTransferFrom(address(this), account, accruedReward);
+        //update total staked amount
+        _totalStakedAmount -= stakedAmount;
+        //update aggregate staked amount
+        _aggregateStakeAmount[account] -= stakedAmount;
+        //update  stake index
+        _stakeIndexes[account][stakeId].exists = false;
+        //return amountStaked + reward
+        return accruedReward;
     }
 }
