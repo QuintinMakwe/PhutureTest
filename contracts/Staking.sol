@@ -5,7 +5,7 @@ import "./interfaces/IERC20.sol";
 import "./libraries/SafeERC20.sol";
 import "./libraries/SafeMath.sol";
 
-pragma solidity 0.7.0;
+pragma solidity ^0.8.0;
 
 contract Staking is IStakingContract {
     using SafeERC20 for IERC20;

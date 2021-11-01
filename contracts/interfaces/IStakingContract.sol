@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.7.0;
+pragma solidity ^0.8.0;
 
 interface IStakingContract {
     function stake(address account, uint256 amount) external returns (uint256);
