@@ -14,7 +14,6 @@ contract Staking is IStakingContract {
     IERC20 _token;
 
     address _distributionContractAddress;
-    address _stakingToken;
 
     uint256 _totalStakedAmount = 0;
     uint256 _totalAccruedReward = 0;
@@ -62,7 +61,6 @@ contract Staking is IStakingContract {
 
     constructor(address stakingTokenAddress) {
         _distributionContractAddress = msg.sender;
-        _stakingToken = stakingTokenAddress;
         _token = IERC20(stakingTokenAddress);
     }
 
