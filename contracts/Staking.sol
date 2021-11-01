@@ -106,4 +106,13 @@ contract Staking is IStakingContract {
         //return index of stake
         return stakeObject.Id;
     }
+
+    function distributeReward(uint256 amount) {
+        require(
+            _totalStakedAmount > 0,
+            "Can only distribute reward when there are staked token stake"
+        );
+
+        _totalAccruedReward += amount / _totalStakedAmount;
+    }
 }
