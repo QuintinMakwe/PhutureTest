@@ -5,12 +5,11 @@ import "./interfaces/IERC20.sol";
 import "./libraries/SafeERC20.sol";
 import "./libraries/SafeMath.sol";
 
-pragma solidity ^0.8.0;
-
-import "hardhat/console.sol";
+pragma solidity 0.7.0;
 
 contract Staking is IStakingContract {
     using SafeERC20 for IERC20;
+    using SafeMath for uint256;
 
     IERC20 _token;
 
@@ -83,7 +82,7 @@ contract Staking is IStakingContract {
         );
 
         //transfer amount from staker to contract
-        token.safeTransferFrom(acount, address(this), amount);
+        _token.safeTransferFrom(account, address(this), amount);
         //update the total amount
         _totalStakedAmount += amount;
         //create stake struct
@@ -95,7 +94,7 @@ contract Staking is IStakingContract {
         //add to array
         _stakes.push(stakeObject);
         //create index
-        Index memory stakeIndex = Index(stakeObject.Id.sub(1), true, true);
+        Index memory stakeIndex = Index(stakeObject.Id.sub(1), true);
 
         _stakeIndexes[account][stakeObject.Id] = stakeIndex;
         //create aggregate stake
@@ -123,11 +122,12 @@ contract Staking is IStakingContract {
         override
         returns (uint256)
     {
-        return _aggregateStakeAmount(recipient);
+        return _aggregateStakeAmount[recipient];
     }
 
     function unstake(address account, uint256 stakeId)
         external
+        override
         returns (uint256)
     {
         //check that stake id exist
