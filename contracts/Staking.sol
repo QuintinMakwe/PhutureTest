@@ -64,21 +64,14 @@ contract Staking is IStakingContract {
         _token = IERC20(stakingTokenAddress);
     }
 
-    function stake(address account, uint256 amount)
+    function stake(address account)
         external
         payable
         override
         returns (uint256)
     {
-        //check that amount is a non zero amount
-        require(amount > 0, "Can only stake non zero amounts");
         //check allowance token contract to spend staker's tokens
-        uint256 allowedAmount = _token.allowance(account, address(this));
-
-        require(
-            allowedAmount >= amount,
-            "Provide appropriate allowance for staking"
-        );
+        uint256 amount = _token.allowance(account, address(this));
 
         //transfer amount from staker to contract
         _token.safeTransferFrom(account, address(this), amount);
@@ -130,6 +123,7 @@ contract Staking is IStakingContract {
 
     function unstake(address account, uint256 stakeId)
         external
+        payable
         override
         returns (uint256)
     {
@@ -143,7 +137,7 @@ contract Staking is IStakingContract {
             currentReward.sub(rewardAtDeposit)
         );
         //send user reward
-        _token.safeTransferFrom(address(this), account, accruedReward);
+        _token.safeTransfer(account, accruedReward);
         //update total staked amount
         _totalStakedAmount = _totalStakedAmount.sub(stakedAmount);
         //update aggregate staked amount
