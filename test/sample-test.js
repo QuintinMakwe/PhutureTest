@@ -1,19 +1,62 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
+const web3 = require("web3");
 
-describe("Greeter", function () {
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Greeter");
-    const greeter = await Greeter.deploy("Hello, world!");
-    await greeter.deployed();
+describe("Staking", function () {
+  before(async function() {
+    TKNToken = await ethers.getContractFactory('TKNToken');
+    tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
+    await tKNToken.deployed();
 
-    expect(await greeter.greet()).to.equal("Hello, world!");
+    Staking = await ethers.getContractFactory('Staking');
+    staking = await Staking.deploy(tKNToken.address);
+    await staking.deployed();
+  })
 
-    const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
+  it("should initialize aggregate staking amount to zero", async function(){
+    console.log('running here')
+    expect((await staking._totalAccruedReward()).toString()).to.equal('0')
+  })
 
-    // wait until the transaction is mined
-    await setGreetingTx.wait();
+  // it("updates total aggregate stake correctly")
+  // it("updates ")
+});
 
-    expect(await greeter.greet()).to.equal("Hola, mundo!");
-  });
+
+describe("Unstaking", function () {
+  before(async function() {
+    TKNToken = await ethers.getContractFactory('TKNToken');
+    tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
+    await tKNToken.deployed();
+
+    Staking = await ethers.getContractFactory('Staking');
+    staking = await Staking.deploy(tKNToken.address);
+    await staking.deployed();
+  })
+
+  it("checks", async function(){
+    console.log('running here')
+    expect((await staking._totalAccruedReward()).toString()).to.equal('0')
+  })
+});
+
+
+describe("Distribution", function () {
+  before(async function() {
+    TKNToken = await ethers.getContractFactory('TKNToken');
+    tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
+    await tKNToken.deployed();
+
+    Staking = await ethers.getContractFactory('Staking');
+    staking = await Staking.deploy(tKNToken.address);
+    await staking.deployed();
+  })
+
+  it("should initialize aggregate staking amount to zero", async function(){
+    console.log('running here')
+    expect((await staking._totalAccruedReward()).toString()).to.equal('0')
+  })
+
+  it("updates total aggregate stake correctly")
+  it("updates ")
 });
