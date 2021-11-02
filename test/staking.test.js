@@ -29,6 +29,10 @@ describe("Staking", function () {
     await tKNToken.approve(staking.address, stakeAmount);
     await expect(staking.stake(owner)).to.emit(staking, 'TokenStaked').withArgs(2, owner, stakeAmount, (BigNumber.from(stakeAmount).add(stakeAmount)), ['2', true], 0);
   })
+
+  it("should throw error if account doesn't approve enough tokens", async function(){
+    await utils.shouldThrow(staking.stake(owner));
+  })
 });
 
 
@@ -53,15 +57,15 @@ describe("Unstaking", function () {
   it("should check that total amount in contract decreased correctly", async function(){
     expect((await staking._totalStakedAmount()).toString()).to.equal('0')
   });
-  it("should check that stake index doesn't exist anymore", async function(){
-    expect((await staking._stakeIndexes(owner, 1)).exists).to.equal(false)
-  } );
-  it("should check the total aggregated stakes for the user updated correctly", async function(){
-    expect((await staking._aggregateStakeAmount(owner)).toString()).to.equal('0')
-  });
+  
   it("should throw an error when wrong stake index is supplied", async function() {
     await utils.shouldThrow(staking.unstake(owner, 1))
   });
+
+  it("should check that event values returned is correct", async function() {
+    await staking.stake(owner);
+    await expect(staking.unstake(owner,2)).to.emit(staking, 'TokenUnstaked').withArgs(2, owner, '0', ['2', false], '0');
+  })
 });
 
 

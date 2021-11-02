@@ -20,7 +20,13 @@ contract Staking is IStakingContract {
         uint256 rewardSnapshot
     );
 
-    event TokenUnstaked(uint256 stakeId, address account, uint256 amount);
+    event TokenUnstaked(
+        uint256 stakeId,
+        address account,
+        uint256 amount,
+        Index stakeIndex,
+        uint256 aggregateStakeAmount
+    );
 
     event DistributionRound(uint256 totalAccruedReward);
 
@@ -172,7 +178,13 @@ contract Staking is IStakingContract {
         _stakeIndexes[account][stakeId].exists = false;
         //return amountStaked + reward
 
-        emit TokenUnstaked(stakeId, account, stakedAmount);
+        emit TokenUnstaked(
+            stakeId,
+            account,
+            stakedAmount,
+            _stakeIndexes[account][stakeId],
+            _aggregateStakeAmount[account]
+        );
         return accruedReward;
     }
 }
