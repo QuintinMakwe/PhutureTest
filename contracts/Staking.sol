@@ -11,6 +11,12 @@ contract Staking is IStakingContract {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
+    event TokenStaked(uint256 stakeId, address account, uint256 amount);
+
+    event TokenUnstaked(uint256 stakeId, address account, uint256 amount);
+
+    event DistributionRound(uint256 amount);
+
     IERC20 _token;
 
     address public _distributionContractAddress;
@@ -98,6 +104,8 @@ contract Staking is IStakingContract {
         //take snapshot
         _rewardSnapshot[account][stakeObject.Id] = _totalAccruedReward;
         //return index of stake
+
+        emit TokenStaked(stakeObject.Id, account, amount);
         return stakeObject.Id;
     }
 
@@ -110,6 +118,8 @@ contract Staking is IStakingContract {
         _totalAccruedReward = _totalAccruedReward.add(
             amount.div(_totalStakedAmount)
         );
+
+        emit DistributionRound(amount);
     }
 
     function viewUnstakableToken(address recipient)
@@ -147,6 +157,8 @@ contract Staking is IStakingContract {
         //update  stake index
         _stakeIndexes[account][stakeId].exists = false;
         //return amountStaked + reward
+
+        emit TokenUnstaked(stakeId, account, stakedAmount);
         return accruedReward;
     }
 }
