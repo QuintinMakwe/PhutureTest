@@ -1,6 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const web3 = require("web3");
+const utils = require('../utils/utils');
 
 describe("Staking", function () {
   let owner 
@@ -65,9 +66,9 @@ describe("Unstaking", function () {
   it("should check the total aggregated stakes for the user updated correctly", async function(){
     expect((await staking._aggregateStakeAmount(owner)).toString()).to.equal('0')
   });
-  // it("should throw an error when wrong stake index is supplied", async function() {
-  //   expect(await staking.unstake(owner, 1)).revertedWith(Error, "VM Exception while processing transaction: reverted with reason string 'No record of stake'")
-  // });
+  it("should throw an error when wrong stake index is supplied", async function() {
+    await utils.shouldThrow(staking.unstake(owner, 1))
+  });
 });
 
 
