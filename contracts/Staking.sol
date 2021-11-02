@@ -11,7 +11,14 @@ contract Staking is IStakingContract {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
 
-    event TokenStaked(uint256 stakeId, address account, uint256 amount);
+    event TokenStaked(
+        uint256 stakeId,
+        address account,
+        uint256 amount,
+        uint256 aggregateStakeAmount,
+        Index stakeIndex,
+        uint256 rewardSnapshot
+    );
 
     event TokenUnstaked(uint256 stakeId, address account, uint256 amount);
 
@@ -92,7 +99,7 @@ contract Staking is IStakingContract {
         //add to array
         _stakes.push(stakeObject);
         //create index
-        Index memory stakeIndex = Index(stakeObject.Id.sub(1), true);
+        Index memory stakeIndex = Index(stakeObject.Id, true);
 
         _stakeIndexes[account][stakeObject.Id] = stakeIndex;
         //create aggregate stake
@@ -105,7 +112,14 @@ contract Staking is IStakingContract {
         _rewardSnapshot[account][stakeObject.Id] = _totalAccruedReward;
         //return index of stake
 
-        emit TokenStaked(stakeObject.Id, account, amount);
+        emit TokenStaked(
+            stakeObject.Id,
+            account,
+            amount,
+            _aggregateStakeAmount[account],
+            stakeIndex,
+            _rewardSnapshot[account][stakeObject.Id]
+        );
         return stakeObject.Id;
     }
 

@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const { BigNumber } = require("ethers");
 const { ethers } = require("hardhat");
 const web3 = require("web3");
 const utils = require('../utils/utils');
@@ -24,18 +25,10 @@ describe("Staking", function () {
     expect((await tKNToken.balanceOf(staking.address)).toString()).to.equal(stakeAmount)
   })
 
-  it("should check that total aggregate stake for actor updated correctly", async function(){
-    expect((await staking._aggregateStakeAmount(owner)).toString()).to.equal(stakeAmount)
+  it("should return right params in event emmitted after stake", async function(){
+    await tKNToken.approve(staking.address, stakeAmount);
+    await expect(staking.stake(owner)).to.emit(staking, 'TokenStaked').withArgs(2, owner, stakeAmount, (BigNumber.from(stakeAmount).add(stakeAmount)), ['2', true], 0);
   })
-  it("should create stake index", async function(){
-    expect((await staking._stakeIndexes(owner, 1)).exists).to.equal(true)
-  })
-  it("should update reward snapshot correctly", async function() {
-    expect((await staking._rewardSnapshot(owner, 1))).to.equal('0')
-  });
-  it("should update individual stake correctly", async function() {
-    expect((await staking._aggregateStakeAmount(owner)).toString()).to.equal(stakeAmount);
-  });
 });
 
 
