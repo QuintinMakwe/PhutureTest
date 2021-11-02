@@ -38,34 +38,61 @@ describe("Staking", function () {
 });
 
 
-// describe("Unstaking", function () {
-//   before(async function() {
-//     TKNToken = await ethers.getContractFactory('TKNToken');
-//     tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
-//     await tKNToken.deployed();
+describe("Unstaking", function () {
+  let owner 
+  let stakeAmount =  web3.utils.toWei("10", "ether")
+  before(async function() {
+    owner = (await ethers.getSigners())['0'].address;
+    TKNToken = await ethers.getContractFactory('TKNToken');
+    tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
+    await tKNToken.deployed();
 
-//     Staking = await ethers.getContractFactory('Staking');
-//     staking = await Staking.deploy(tKNToken.address);
-//     await staking.deployed();
-//   })
+    Staking = await ethers.getContractFactory('Staking');
+    staking = await Staking.deploy(tKNToken.address);
+    await staking.deployed();
 
-//   it("should check that total amount in contract decreased correctly");
-//   it("should check that stake index doesn't exist");
-//   it("should check the total aggregated stakes for the user updated correctly");
-//   it("should throw an error when wrong stake index is supplied");
-// });
+    await tKNToken.approve(staking.address, stakeAmount);
+    await staking.stake(owner);
+    await staking.unstake(owner, 1);
+  })
+
+  it("should check that total amount in contract decreased correctly", async function(){
+    expect((await staking._totalStakedAmount()).toString()).to.equal('0')
+  });
+  it("should check that stake index doesn't exist anymore", async function(){
+    expect((await staking._stakeIndexes(owner, 1)).exists).to.equal(false)
+  } );
+  it("should check the total aggregated stakes for the user updated correctly", async function(){
+    expect((await staking._aggregateStakeAmount(owner)).toString()).to.equal('0')
+  });
+  // it("should throw an error when wrong stake index is supplied", async function() {
+  //   expect(await staking.unstake(owner, 1)).revertedWith(Error, "VM Exception while processing transaction: reverted with reason string 'No record of stake'")
+  // });
+});
 
 
-// describe("Distribution", function () {
-//   before(async function() {
-//     TKNToken = await ethers.getContractFactory('TKNToken');
-//     tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
-//     await tKNToken.deployed();
+describe("Distribution", function () {
+  let owner
+  let distributeValue =  web3.utils.toWei("10", "ether")
+  let stakeAmount =  web3.utils.toWei("10", "ether")
+  before(async function() {
+    owner = (await ethers.getSigners())['0'].address;
+    TKNToken = await ethers.getContractFactory('TKNToken');
+    tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
+    await tKNToken.deployed();
 
-//     Staking = await ethers.getContractFactory('Staking');
-//     staking = await Staking.deploy(tKNToken.address);
-//     await staking.deployed();
-//   })
+    Staking = await ethers.getContractFactory('Staking');
+    staking = await Staking.deploy(tKNToken.address);
+    await staking.deployed();
 
-//   it("should check that total accrued reward on the system updated correctly");
-// });
+    await tKNToken.approve(staking.address, stakeAmount);
+    await staking.stake(owner);
+    await staking.distributeReward(distributeValue);
+  })
+
+  it("should check that total accrued reward on the system updated correctly", async function(){
+    const totalAccruedReward = 0 + distributeValue/stakeAmount
+    expect((await staking._totalAccruedReward()).toString()).to.equal(totalAccruedReward.toString())
+  });
+});
+
