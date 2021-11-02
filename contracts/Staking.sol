@@ -15,7 +15,7 @@ contract Staking is IStakingContract {
 
     event TokenUnstaked(uint256 stakeId, address account, uint256 amount);
 
-    event DistributionRound(uint256 amount);
+    event DistributionRound(uint256 totalAccruedReward);
 
     IERC20 _token;
 
@@ -119,7 +119,7 @@ contract Staking is IStakingContract {
             amount.div(_totalStakedAmount)
         );
 
-        emit DistributionRound(amount);
+        emit DistributionRound(_totalAccruedReward);
     }
 
     function viewUnstakableToken(address recipient)
