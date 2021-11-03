@@ -7,7 +7,7 @@ const utils = require('../utils/utils');
 describe("Staking", function () {
   let owner 
   let stakeAmount =  web3.utils.toWei("10", "ether")
-  before(async function() {
+  beforeEach(async function() {
     owner = (await ethers.getSigners())['0'].address;
     TKNToken = await ethers.getContractFactory('TKNToken');
     tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
@@ -39,7 +39,7 @@ describe("Staking", function () {
 describe("Unstaking", function () {
   let owner 
   let stakeAmount =  web3.utils.toWei("10", "ether")
-  before(async function() {
+  beforeEach(async function() {
     owner = (await ethers.getSigners())['0'].address;
     TKNToken = await ethers.getContractFactory('TKNToken');
     tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
@@ -55,6 +55,7 @@ describe("Unstaking", function () {
   })
 
   it("should check that total amount in contract decreased correctly", async function(){
+    console.log('total staked amount ', BigNumber.from(await staking._totalStakedAmount()).toString())
     expect((await staking._totalStakedAmount()).toString()).to.equal('0')
   });
   
@@ -73,7 +74,7 @@ describe("Distribution", function () {
   let owner
   let distributeValue =  web3.utils.toWei("10", "ether")
   let stakeAmount =  web3.utils.toWei("10", "ether")
-  before(async function() {
+  beforeEach(async function() {
     owner = (await ethers.getSigners())['0'].address;
     TKNToken = await ethers.getContractFactory('TKNToken');
     tKNToken= await TKNToken.deploy(web3.utils.toWei('100000000', "ether"))
